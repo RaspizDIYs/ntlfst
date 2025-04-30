@@ -1,4 +1,15 @@
+# Dependencies
 node_modules/
+
+# Build
 dist/
+dist-ssr/
+
+# Environment
 .env
+.env.local
+
+# Editor
 .idea/
+.vscode/
+.DS_Store
