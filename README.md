@@ -1,3 +1,4 @@
-# React + Vite + TailWind CSS
-# Дошли руки запушить это несчастье.
-Ждём когда же я накину это на Netlify
+# React + Vite + TailWind CSS + Netlify
+## https://raspizdiy.netlify.app
+Бля....Сука ебанская бляяя...
+
