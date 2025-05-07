@@ -1,0 +1,114 @@
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000; /* Черный фон */
+    z-index: 1000;
+}
+
+@font-face {
+    font-family: 'CustomFont';
+    src: url('../assets/fonts/PixelizerBold.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.text {
+    position: relative;
+    font-family: 'CustomFont', monospace; /* Применяем кастомный шрифт */
+    font-size: 2.5rem;
+    color: #fff; /* Белый текст */
+    letter-spacing: 2px; /* Добавляем промежуток между буквами */
+}
+
+/* Глитч-эффект через псевдоэлементы */
+.text.glitch::before,
+.text.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    clip-path: inset(0 0 0 0);
+}
+
+.text.glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff4444;
+    animation: glitch-before 1.5s infinite;
+}
+
+.text.glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 #44ff44;
+    animation: glitch-after 1.5s infinite;
+}
+
+/* Анимация глитч-эффекта */
+@keyframes glitch-before {
+    0% {
+        clip-path: inset(80% 0 0 0);
+        transform: translate(0, -2px);
+    }
+    20% {
+        clip-path: inset(10% 0 0 0);
+        transform: translate(2px, 0);
+    }
+    40% {
+        clip-path: inset(50% 0 0 0);
+        transform: translate(-2px, 0);
+    }
+    60% {
+        clip-path: inset(30% 0 0 0);
+        transform: translate(2px, 2px);
+    }
+    80% {
+        clip-path: inset(20% 0 0 0);
+        transform: translate(-2px, -2px);
+    }
+    100% {
+        clip-path: inset(10% 0 0 0);
+        transform: translate(0, 2px);
+    }
+}
+
+@keyframes glitch-after {
+    0% {
+        clip-path: inset(0 0 80% 0);
+        transform: translate(0, 4px);
+    }
+    20% {
+        clip-path: inset(0 0 10% 0);
+        transform: translate(-2px, 0);
+    }
+    40% {
+        clip-path: inset(0 0 50% 0);
+        transform: translate(4px, 0);
+    }
+    60% {
+        clip-path: inset(0 0 30% 0);
+        transform: translate(-2px, -2px);
+    }
+    80% {
+        clip-path: inset(0 0 20% 0);
+        transform: translate(4px, 4px);
+    }
+    100% {
+        clip-path: inset(0 0 10% 0);
+        transform: translate(0, -2px);
+    }
+}
+
+.highlight {
+    color: #ff4444;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+    transition: color 0.3s ease-in-out;
+}
