@@ -3,7 +3,7 @@
 body {
     margin: 0;
     padding: 0;
-    background: rgb(41 53 68); /* Тёмный фон */
+    background: rgb(31 31 31); /* Тёмный фон */
     color: #fff; /* Белый текст */
     font-family: 'CustomFont', Arial, sans-serif;
 }

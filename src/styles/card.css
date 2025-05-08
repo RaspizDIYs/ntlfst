@@ -36,6 +36,8 @@
     justify-content: center;
     align-items: center;
     box-shadow: 0 0 10px rgb(0 0 0 / 68%);
+    min-width: 300px; /* Минимальная ширина */
+    min-height: 400px; /* Минимальная высота */
 }
 
 .card-back {
@@ -48,6 +50,8 @@
     align-items: center;
     padding: 20px;
     box-shadow: 0 0 10px rgb(0 0 0 / 68%);
+    min-width: 300px; /* Минимальная ширина */
+    min-height: 400px; /* Минимальная высота */
 }
 
 .footer {

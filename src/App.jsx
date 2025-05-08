@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import MemberCard from "./components/MemberCard";
-import GlitchAnimation from "./components/GlitchAnimation"; // Импортируем компонент для глитч-эффекта
 import { Octokit } from "@octokit/rest";
 import SplashScreen from "./splashscreen/SplashScreen";
 
@@ -70,9 +69,6 @@ function App() {
 
     return (
         <div className="main-container relative">
-            {/* Глитч-эффект на фоне */}
-            <GlitchAnimation />
-
             {/* Основной контент */}
             <div className="flex h-screen relative z-10">
                 {/* Sidebar с участниками */}

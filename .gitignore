@@ -14,10 +14,12 @@ node_modules
 dist
 dist-ssr
 *.local
+.vite/
+.cache/
 
 # Environment variables
 .env
-.env.* # Игнорирование всех файлов, начинающихся на .env (например, .env.production, .env.development)
+.env.*
 
 # Editor directories and files
 .vscode/*
@@ -29,3 +31,31 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary files
+*.tmp
+*.log.*
+*.pid
+*.seed
+*.stackdump
+Thumbs.db
+
+# Testing tools
+cypress/videos/
+cypress/screenshots/
+playwright-report/
+
+# CI/CD and local configs
+*.env.local
+*.env.production.local
+
+# Docker files
+docker-compose.override.yml
+.env.docker
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.npm/
+.pnpm-store/
