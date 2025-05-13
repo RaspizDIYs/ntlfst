@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from "./SplashScreen.module.css";
+import styles from './SplashScreen.module.css';
 
 const SplashScreen = ({ onComplete }) => {
     const [text, setText] = useState('');
@@ -7,46 +7,47 @@ const SplashScreen = ({ onComplete }) => {
 
     useEffect(() => {
         const animate = async () => {
-            // Этап 1: Печатаем "Raspizdiy" по буквам
             let current = '';
+
+            // Этап 1: Печатаем "Raspizdiy"
             for (let char of 'Raspizdiy') {
                 current += char;
                 setText(current);
-                await new Promise(r => setTimeout(r, 150));
+                await new Promise((r) => setTimeout(r, 200));
             }
 
-            // Пауза перед стиранием
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise((r) => setTimeout(r, 500));
 
-            // Этап 2: Стираем "diy" (3 последние буквы) по одной
+            // Этап 2: Удаляем "diy"
             for (let i = 0; i < 3; i++) {
                 current = current.slice(0, -1);
                 setText(current);
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise((r) => setTimeout(r, 200));
             }
 
-            // Пауза перед добавлением DIY
-            await new Promise(r => setTimeout(r, 300));
+            await new Promise((r) => setTimeout(r, 400));
 
-            // Этап 3: Печатаем "DIY" заглавными по буквам
+            // Этап 3: Добавляем "DIY"
             for (let char of 'DIY') {
                 current += char;
                 setText(current);
-                await new Promise(r => setTimeout(r, 150));
+                await new Promise((r) => setTimeout(r, 200));
             }
 
-            // Этап 4: Добавляем "s" и подсвечиваем
+            // Этап 4: добавляем "s" и выделяем
             current += 's';
             setText(current);
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise((r) => setTimeout(r, 200));
             setHighlightDIY(true);
 
-            // Завершение через 1 секунду
-            await new Promise(r => setTimeout(r, 1000));
-            onComplete(); // Уведомляем App о завершении анимации
+            // Конец
+            await new Promise((r) => setTimeout(r, 1000));
+            onComplete();
         };
 
-        animate();
+        void animate();
+
+        return () => {};
     }, [onComplete]);
 
     return (
