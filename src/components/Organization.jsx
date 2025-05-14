@@ -3,8 +3,9 @@ import { Octokit } from "@octokit/rest";
 import MemberCard from "./MemberCard";
 import Sidebar from "./Sidebar";
 
+// Инициализация Octokit с токеном
 const octokit = new Octokit({
-    auth: import.meta.env.VITE_GITHUB_TOKEN,
+    auth: import.meta.env.VITE_GITHUB_TOKEN, // Используем Vite-специфичный способ доступа к переменным окружения
 });
 
 const Organization = ({ orgName, orgInfo }) => {
@@ -15,13 +16,13 @@ const Organization = ({ orgName, orgInfo }) => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-
+                // Получение списка участников организации
                 const { data } = await octokit.orgs.listMembers({
                     org: orgName,
                 });
 
                 setMembers(data);
-                setSelectedMember(data[0]);
+                setSelectedMember(data[0]); // Выбираем первого участника по умолчанию
             } catch (error) {
                 console.error("Ошибка при загрузке участников:", error);
             } finally {
@@ -41,7 +42,7 @@ const Organization = ({ orgName, orgInfo }) => {
             <Sidebar
                 members={members}
                 onSelectMember={setSelectedMember}
-                orgInfo={orgInfo}
+                orgInfo={orgInfo} // Передаём информацию об организации
             />
             <div className="flex-1 flex items-center justify-center p-8">
                 {selectedMember ? (
