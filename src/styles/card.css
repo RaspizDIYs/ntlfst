@@ -1,5 +1,3 @@
-
-
 .card-container {
     width: 350px;
     height: 500px;
@@ -27,38 +25,47 @@
     backface-visibility: hidden;
     border-radius: 10px; /* Закруглённые углы */
     overflow: hidden; /* Обрезаем содержимое */
-}
-
-.card-front {
-    background: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     box-shadow: 0 0 10px rgb(0 0 0 / 68%);
     min-width: 300px; /* Минимальная ширина */
     min-height: 400px; /* Минимальная высота */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Убрал фон и цвет, теперь управляется через Tailwind в React */
+/*
+.card-front {
+    background: white;
+    color: #333;
+}
+
+.dark .card-front {
+    background-color: #1a1a1a;
+    color: #ddd;
+    box-shadow: 0 0 12px rgb(255 255 255 / 0.2);
+}
+*/
 
 .card-back {
     background-size: cover;
     background-position: center;
     transform: rotateY(180deg);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 20px;
-    box-shadow: 0 0 10px rgb(0 0 0 / 68%);
-    min-width: 300px; /* Минимальная ширина */
-    min-height: 400px; /* Минимальная высота */
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
 }
 
-.footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 0 0 10px 10px; /* Закругление нижней части */
+/* Класс для аватара */
+.avatar {
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgb(0 0 0 / 0.3);
+}
+
+/* Кнопки и другие мелкие стили */
+button {
+    cursor: pointer;
+}
+
+.loading-placeholder {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 2rem;
+    color: gray;
 }

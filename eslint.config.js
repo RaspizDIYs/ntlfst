@@ -4,7 +4,10 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
+  // Игнорируем dist, node_modules и TypeScript-файлы
+  {
+    ignores: ['dist', 'node_modules', '**/*.ts', '**/*.tsx'],
+  },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -23,7 +26,7 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^(motion|[A-Z_])' }], // Добавлено исключение для motion
+      'no-unused-vars': ['error', {varsIgnorePattern: '^(motion|[A-Z_])'}],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },

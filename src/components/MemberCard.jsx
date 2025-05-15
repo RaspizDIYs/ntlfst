@@ -1,3 +1,4 @@
+// MemberCard.jsx
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { FaSyncAlt, FaTimes } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,7 +14,7 @@ import defaultBack from "../assets/cardface/default-back.png";
 import { staleWhileRevalidate, saveToCache } from "../utils/staleWhileRevalidate";
 const LanguagesList = lazy(() => import("./LanguagesList"));
 
-import languageColorsData from "../utils/languageColors";
+import useThemeStore from "../store/useThemeStore"; // импорт темы
 
 const cardBackImages = {
     Alexxxxxander: alexxxxxanderBack,
@@ -46,17 +47,60 @@ query($username: String!) {
 `;
 
 const MemberCard = React.memo(({ member, onClose }) => {
+    const {isDark} = useThemeStore(); // получение темы
+
     const [isFlipped, setIsFlipped] = useState(false);
     const [loading, setLoading] = useState(true);
     const [languages, setLanguages] = useState([]);
     const [repoCount, setRepoCount] = useState(0);
 
     useEffect(() => {
+        const fetchLanguagesFromAPI = async (login) => {
+            const response = await fetch("https://api.github.com/graphql", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: GRAPHQL_QUERY,
+                    variables: {username: login},
+                }),
+            });
+
+            if (!response.ok) {
+                console.error("Network Error:", response.statusText);
+                return {languages: [], repoCount: 0};
+            }
+
+            const {data, errors} = await response.json();
+            if (errors) {
+                console.error("GraphQL Errors:", errors);
+                return {languages: [], repoCount: 0};
+            }
+
+            const repositories = data.user.repositories;
+            const aggregatedLanguages = {};
+            repositories.nodes
+                .filter((repo) => !repo.isArchived && repo.languages.edges.length > 0)
+                .forEach((repo) => {
+                    repo.languages.edges.forEach(({node, size}) => {
+                        aggregatedLanguages[node.name] =
+                            (aggregatedLanguages[node.name] || 0) + size;
+                    });
+                });
+
+            return {
+                languages: Object.keys(aggregatedLanguages),
+                repoCount: repositories.totalCount,
+            };
+        };
+
         const fetchLanguages = async () => {
             setLoading(true);
             const cacheKey = `languages_${member.login}`;
 
-            const { data: cachedData, isStale } = await staleWhileRevalidate(
+            const {data: cachedData, isStale} = await staleWhileRevalidate(
                 cacheKey,
                 () => fetchLanguagesFromAPI(member.login)
             );
@@ -78,47 +122,6 @@ const MemberCard = React.memo(({ member, onClose }) => {
         fetchLanguages();
     }, [member.login]);
 
-    const fetchLanguagesFromAPI = async (login) => {
-        const response = await fetch("https://api.github.com/graphql", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                query: GRAPHQL_QUERY,
-                variables: { username: login },
-            }),
-        });
-
-        if (!response.ok) {
-            console.error("Network Error:", response.statusText);
-            return { languages: [], repoCount: 0 };
-        }
-
-        const { data, errors } = await response.json();
-        if (errors) {
-            console.error("GraphQL Errors:", errors);
-            return { languages: [], repoCount: 0 };
-        }
-
-        const repositories = data.user.repositories;
-        const aggregatedLanguages = {};
-        repositories.nodes
-            .filter((repo) => !repo.isArchived && repo.languages.edges.length > 0)
-            .forEach((repo) => {
-                repo.languages.edges.forEach(({ node, size }) => {
-                    aggregatedLanguages[node.name] =
-                        (aggregatedLanguages[node.name] || 0) + size;
-                });
-            });
-
-        return {
-            languages: Object.keys(aggregatedLanguages),
-            repoCount: repositories.totalCount,
-        };
-    };
-
     const handleCardFlip = () => setIsFlipped(!isFlipped);
 
     const cardBackImage = cardBackImages[member.login] || cardBackImages.default;
@@ -126,13 +129,20 @@ const MemberCard = React.memo(({ member, onClose }) => {
     return (
         <div className="card-container relative max-w-screen-lg mx-auto">
             <div className={`card ${isFlipped ? "flipped" : ""}`}>
-                <div className="card-front bg-white rounded-lg shadow-lg overflow-auto max-h-[90vh] p-8 relative">
+                <div
+                    className={`card-front rounded-lg shadow-lg overflow-auto max-h-[90vh] p-8 relative transition-colors duration-300
+                    ${isDark ? "bg-white text-gray-800" : "bg-[#1a1a1a] text-gray-200"}`}
+                >
                     <button
                         onClick={onClose}
-                        className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
+                        className={`absolute top-2 right-2 transition-colors duration-300 ${
+                            isDark ? "text-gray-500 hover:text-red-600" : "text-gray-400 hover:text-red-500"
+                        }`}
+                        aria-label="Close card"
                     >
                         <FaTimes size={20} />
                     </button>
+
                     {loading ? (
                         <div className="loading-placeholder">Загрузка...</div>
                     ) : (
@@ -142,33 +152,53 @@ const MemberCard = React.memo(({ member, onClose }) => {
                                 alt={member.name}
                                 className="avatar w-28 h-28 rounded-full mx-auto mb-6 shadow"
                             />
-                            <h2 className="text-2xl text-gray-700 font-bold text-center">
+                            <h2
+                                className={`text-2xl font-bold text-center ${
+                                    isDark ? "text-gray-800" : "text-gray-200"
+                                }`}
+                            >
                                 {member.name || member.login}
                             </h2>
-                            <p className="text-center text-gray-500">@{member.login}</p>
+                            <p className={`text-center ${isDark ? "text-gray-700" : "text-gray-400"}`}>
+                                @{member.login}
+                            </p>
+
                             <div className="languages mt-6">
-                                <h3 className="text-sm font-semibold text-gray-700 mb-4">
+                                <h3
+                                    className={`text-sm font-semibold mb-4 ${
+                                        isDark ? "text-gray-700" : "text-gray-300"
+                                    }`}
+                                >
                                     Используемые языки:
                                 </h3>
                                 <Suspense fallback={<div>Loading languages...</div>}>
                                     <LanguagesList languages={languages} />
                                 </Suspense>
                             </div>
+
                             <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
                                 <a
                                     href={member.html_url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-gray-500 hover:text-gray-800"
+                                    className={`transition-colors duration-300 ${
+                                        isDark ? "text-gray-700 hover:text-gray-900" : "text-gray-400 hover:text-gray-200"
+                                    }`}
+                                    aria-label="GitHub profile"
                                 >
                                     <FontAwesomeIcon icon={faGithub} size="2x" />
                                 </a>
-                                <span className="text-sm text-gray-700 font-semibold">
+                                <span
+                                    className={`text-sm font-semibold ${
+                                        isDark ? "text-gray-700" : "text-gray-200"
+                                    }`}
+                                >
                                     {repoCount} репозиториев
                                 </span>
                                 <button
                                     onClick={handleCardFlip}
                                     className="text-white hover:text-gray-300 border border-white rounded-full p-2 bg-black bg-opacity-50"
+                                    aria-label="Flip card"
                                 >
                                     <FaSyncAlt size={20} />
                                 </button>
@@ -180,11 +210,13 @@ const MemberCard = React.memo(({ member, onClose }) => {
                     className="card-back bg-cover bg-center rounded-lg shadow-lg max-h-[90vh] overflow-hidden relative"
                     style={{
                         backgroundImage: `url(${cardBackImage})`,
+                        filter: isDark ? "brightness(0.7)" : "none",
                     }}
                 >
                     <button
                         onClick={handleCardFlip}
                         className="absolute bottom-6 right-6 text-white hover:text-gray-300 border border-white rounded-full p-2 bg-black bg-opacity-50"
+                        aria-label="Flip back"
                     >
                         <FaSyncAlt size={20} />
                     </button>

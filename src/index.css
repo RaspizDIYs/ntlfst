@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 body {
-    margin: 0;
-    padding: 0;
-    background: rgb(31 31 31); /* Тёмный фон */
-    color: #fff; /* Белый текст */
-    font-family: 'CustomFont', Arial, sans-serif;
+    @apply bg-white text-black transition-colors duration-300;
+}
+
+html.dark body {
+    @apply bg-[#1a1a1a] text-gray-200;
 }

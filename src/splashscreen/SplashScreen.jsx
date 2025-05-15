@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from "./SplashScreen.module.css";
+import styles from "../styles/SplashScreen.module.css";
 
 const SplashScreen = ({ onComplete }) => {
     const [text, setText] = useState('');

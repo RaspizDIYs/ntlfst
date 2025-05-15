@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import MemberCard from "./components/MemberCard";
 import { Octokit } from "@octokit/rest";
 import SplashScreen from "./splashscreen/SplashScreen";
+import useThemeStore from "./store/useThemeStore";
 
 // Инициализация Octokit с токеном
 const octokit = new Octokit({
@@ -10,11 +11,13 @@ const octokit = new Octokit({
 });
 
 function App() {
-    const [orgInfo, setOrgInfo] = useState(null); // Информация об организации
-    const [members, setMembers] = useState([]); // Список участников
-    const [selectedMember, setSelectedMember] = useState(null); // Выбранный участник
-    const [loading, setLoading] = useState(true); // Состояние загрузки данных
-    const [splashCompleted, setSplashCompleted] = useState(false); // Состояние завершения заставки
+    const [orgInfo, setOrgInfo] = useState(null);
+    const [members, setMembers] = useState([]);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [splashCompleted, setSplashCompleted] = useState(false);
+
+    const {isDark} = useThemeStore();
 
     useEffect(() => {
         const fetchOrgInfo = async () => {
@@ -37,48 +40,42 @@ function App() {
                 const { data } = await octokit.orgs.listMembers({
                     org: "RaspizDIYs",
                 });
-                setMembers(data); // Устанавливаем список участников
+                setMembers(data);
             } catch (error) {
                 console.error("Ошибка при загрузке участников организации:", error);
             } finally {
-                setLoading(false); // Завершаем загрузку данных
+                setLoading(false);
             }
         };
 
-        fetchOrgInfo();
-        fetchMembers();
+        void fetchOrgInfo();
+        void fetchMembers();
     }, []);
 
-    // Callback для завершения заставки
     const handleSplashComplete = () => {
         setSplashCompleted(true);
     };
 
     const handleSelectMember = (member) => {
-        setSelectedMember(member); // Устанавливаем выбранного участника
+        setSelectedMember(member);
     };
 
     const handleCloseCard = () => {
-        setSelectedMember(null); // Закрываем карточку
+        setSelectedMember(null);
     };
 
-    // Если заставка ещё не завершена или данные загружаются, показываем заставку
     if (!splashCompleted || loading) {
         return <SplashScreen onComplete={handleSplashComplete} />;
     }
 
     return (
-        <div className="main-container relative">
-            {/* Основной контент */}
+        <div className={`main-container relative ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
             <div className="flex h-screen relative z-10">
-                {/* Sidebar с участниками */}
                 <Sidebar
                     members={members}
                     onSelectMember={handleSelectMember}
                     orgInfo={orgInfo}
                 />
-
-                {/* Карточка участника */}
                 {selectedMember && (
                     <div className="flex-grow flex items-center justify-center">
                         <MemberCard member={selectedMember} onClose={handleCloseCard} />
