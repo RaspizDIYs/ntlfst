@@ -1,73 +1,104 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-const TENOR_API_KEY = 'AIzaSyDop1L4TXu0HQhNUOxE4FmoA5c67-7LYxM';
+const LIMIT = 20;
+const DEBOUNCE_DELAY = 300;
 
 const GifPicker = ({ onSelectGif }) => {
     const [gifs, setGifs] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [search, setSearch] = useState('');
 
-    const fetchGifs = async (query = '') => {
-        const url = query
-            ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_API_KEY}&limit=12`
-            : `https://tenor.googleapis.com/v2/trending?key=${TENOR_API_KEY}&limit=12`;
+    // Дебаунс для поиска
+    const fetchGifs = useCallback(
+        async (searchTerm = '') => {
+            setLoading(true);
+            setError(null);
 
-        try {
-            const res = await fetch(url);
-            const json = await res.json();
+            try {
+                const url = searchTerm
+                    ? `/.netlify/functions/gifProxy?q=${encodeURIComponent(searchTerm)}&limit=${LIMIT}`
+                    : `/.netlify/functions/gifProxy?limit=${LIMIT}`;
 
-            // Защита: если json.results — не массив, поставить пустой массив
-            const results = Array.isArray(json.results) ? json.results : [];
-            setGifs(results);
-        } catch (err) {
-            console.error('Ошибка при загрузке GIF:', err);
-            setGifs([]);
-        }
-    };
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ошибка: ${response.status}`);
 
+                const data = await response.json();
+
+                if (!data?.results || !Array.isArray(data.results)) {
+                    throw new Error('Неверный формат ответа API');
+                }
+
+                // Tenor v2 возвращает media_formats внутри results[].media_formats
+                const gifsData = data.results
+                    .map((gif) => {
+                        // Приоритет выбора gif.url по media_formats (gif, mediumgif)
+                        const url =
+                            gif.media_formats?.gif?.url ||
+                            gif.media_formats?.mediumgif?.url ||
+                            '';
+
+                        return {
+                            id: gif.id,
+                            url,
+                            title: gif.content_description || '',
+                        };
+                    })
+                    .filter((gif) => gif.url);
+
+                setGifs(gifsData);
+            } catch (err) {
+                console.error('Ошибка загрузки гифок:', err);
+                setError(err.message);
+                setGifs([]);
+            } finally {
+                setLoading(false);
+            }
+        },
+        []
+    );
+
+    // useEffect для начальной загрузки трендов
     useEffect(() => {
-        void fetchGifs();
-    }, []);
+        fetchGifs();
+    }, [fetchGifs]);
 
-    const onSearchKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            void fetchGifs(search);
-        }
-    };
+    // Дебаунс хук
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            fetchGifs(search.trim());
+        }, DEBOUNCE_DELAY);
+
+        return () => clearTimeout(handler);
+    }, [search, fetchGifs]);
 
     return (
-        <div className="border rounded p-2 bg-gray-100 max-h-48 overflow-y-auto">
+        <div>
             <input
                 type="text"
-                placeholder="Поиск GIF"
+                placeholder="Поиск гифок..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={onSearchKeyDown}
-                className="w-full p-1 border rounded mb-2"
+                style={{ marginBottom: 10, padding: 6, width: '100%' }}
+                aria-label="Поиск гифок"
+                autoComplete="off"
             />
-            <div className="grid grid-cols-4 gap-2">
-                {gifs.map((gif) => {
-                    // Подстраховка на структуру объекта GIF из Tenor API
-                    const gifUrl =
-                        gif.media_formats?.gif?.url ||
-                        (gif.media && gif.media[0]?.gif?.url) ||
-                        '';
-                    const description = gif.content_description || 'gif';
 
-                    if (!gifUrl) return null;
+            {loading && <p>Загрузка гифок...</p>}
+            {error && <p style={{ color: 'red' }}>Ошибка: {error}</p>}
 
-                    return (
-                        <img
-                            key={gif.id}
-                            src={gifUrl}
-                            alt={description}
-                            className="cursor-pointer rounded hover:opacity-80"
-                            onClick={() => onSelectGif(gifUrl)}
-                            loading="lazy"
-                            draggable={false}
-                        />
-                    );
-                })}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {gifs.map(({ id, url, title }) => (
+                    <img
+                        key={id}
+                        src={url}
+                        alt={title || 'GIF'}
+                        style={{ width: 100, height: 100, objectFit: 'cover', cursor: 'pointer' }}
+                        onClick={() => onSelectGif && onSelectGif(url)}
+                        title="Выбрать гифку"
+                        loading="lazy"
+                    />
+                ))}
             </div>
         </div>
     );

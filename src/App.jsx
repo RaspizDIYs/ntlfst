@@ -1,3 +1,4 @@
+// app.jsx
 import React, { useContext, useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import MemberCard from "./components/MemberCard";
@@ -57,32 +58,49 @@ function AppContent() {
     const handleSelectMember = (member) => setSelectedMember(member);
     const handleCloseCard = () => setSelectedMember(null);
 
-    if (!user) {
-        return <Login />;
-    }
-
     if (!splashCompleted || loading) {
         return <SplashScreen onComplete={handleSplashComplete} />;
     }
 
     return (
-        <div className={`main-container relative min-h-screen ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-            <div className="flex flex-col md:flex-row h-full relative z-10">
-                <div className="w-full md:w-1/6 flex-shrink-0">
-                    <Sidebar members={members} onSelectMember={handleSelectMember} orgInfo={orgInfo} />
-                </div>
+        <div
+            className={`min-h-screen w-full ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}
+            style={{ overflowX: 'hidden' }}
+        >
+            <div className="mx-auto px-4" style={{ maxWidth: 1280 }}>
+                <div className="flex flex-col md:flex-row min-h-screen relative z-10">
 
-                <div className="flex-grow flex items-center justify-center overflow-auto p-4">
-                    {selectedMember ? (
-                        <MemberCard member={selectedMember} onClose={handleCloseCard} />
-                    ) : (
-                        <p className="text-center text-gray-500 dark:text-gray-400">Mem</p>
-                    )}
-                </div>
+                    {/* Sidebar */}
+                    <div className="w-full md:w-1/6 flex-shrink-0 mb-4 md:mb-0">
+                        <Sidebar members={members} onSelectMember={handleSelectMember} orgInfo={orgInfo} />
+                    </div>
 
-                <aside className="w-full md:w-80 flex-shrink-0">
-                    <Comments />
-                </aside>
+                    {/* Основной контент */}
+                    <div className="flex-grow p-4 mb-4 md:mb-0 overflow-auto">
+                        {selectedMember ? (
+                            <MemberCard member={selectedMember} onClose={handleCloseCard} />
+                        ) : (
+                            <p className="text-center text-gray-500 dark:text-gray-400">
+                                {user
+                                    ? "Mem"
+                                    : "Вы вошли как гость. Пожалуйста, войдите для расширенного доступа."}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Комментарии */}
+                    <aside
+                        className="w-full md:w-80 flex-shrink-0 md:pl-4"
+                        style={{ maxWidth: 320 }}
+                    >
+                        <Comments user={user} />
+                        {!user && (
+                            <div className="mt-4 text-center">
+                                <Login />
+                            </div>
+                        )}
+                    </aside>
+                </div>
             </div>
         </div>
     );
