@@ -66,24 +66,21 @@ function AppContent() {
     }
 
     return (
-        <div className={`main-container relative ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-            <div className="flex h-screen relative z-10">
-                {/* Левый сайдбар */}
-                <div className="md:w-1/6 w-0 hidden md:block">
+        <div className={`main-container relative min-h-screen ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+            <div className="flex flex-col md:flex-row h-full relative z-10">
+                <div className="w-full md:w-1/6 flex-shrink-0">
                     <Sidebar members={members} onSelectMember={handleSelectMember} orgInfo={orgInfo} />
                 </div>
 
-                {/* Основной контент */}
-                <div className="flex-grow flex items-center justify-center overflow-auto">
+                <div className="flex-grow flex items-center justify-center overflow-auto p-4">
                     {selectedMember ? (
                         <MemberCard member={selectedMember} onClose={handleCloseCard} />
                     ) : (
-                        <p className="text-center text-gray-500">Выберите участника слева</p>
+                        <p className="text-center text-gray-500 dark:text-gray-400">Mem</p>
                     )}
                 </div>
 
-                {/* Правый сайдбар — комментарии */}
-                <aside className="w-80 overflow-auto hidden md:flex flex-col">
+                <aside className="w-full md:w-80 flex-shrink-0">
                     <Comments />
                 </aside>
             </div>
