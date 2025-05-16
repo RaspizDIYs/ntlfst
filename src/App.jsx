@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import MemberCard from "./components/MemberCard";
-import { Octokit } from "@octokit/rest";
 import SplashScreen from "./splashscreen/SplashScreen";
 import useThemeStore from "./store/useThemeStore";
+import { Octokit } from "@octokit/rest";
 
-// Инициализация Octokit с токеном
+import AuthProvider from './context/AuthProvider';
+import AuthContext from './context/AuthContext';
+import Login from './components/Login';
+import Comments from './components/Comments';
+
 const octokit = new Octokit({
     auth: import.meta.env.VITE_GITHUB_TOKEN,
 });
 
-function App() {
+function AppContent() {
+    const { user } = useContext(AuthContext);
     const [orgInfo, setOrgInfo] = useState(null);
     const [members, setMembers] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
@@ -22,9 +27,7 @@ function App() {
     useEffect(() => {
         const fetchOrgInfo = async () => {
             try {
-                const { data } = await octokit.orgs.get({
-                    org: "RaspizDIYs",
-                });
+                const { data } = await octokit.orgs.get({ org: "RaspizDIYs" });
                 setOrgInfo({
                     name: data.name || "RaspizDIYs",
                     avatar_url: data.avatar_url,
@@ -37,9 +40,7 @@ function App() {
 
         const fetchMembers = async () => {
             try {
-                const { data } = await octokit.orgs.listMembers({
-                    org: "RaspizDIYs",
-                });
+                const { data } = await octokit.orgs.listMembers({ org: "RaspizDIYs" });
                 setMembers(data);
             } catch (error) {
                 console.error("Ошибка при загрузке участников организации:", error);
@@ -52,17 +53,13 @@ function App() {
         void fetchMembers();
     }, []);
 
-    const handleSplashComplete = () => {
-        setSplashCompleted(true);
-    };
+    const handleSplashComplete = () => setSplashCompleted(true);
+    const handleSelectMember = (member) => setSelectedMember(member);
+    const handleCloseCard = () => setSelectedMember(null);
 
-    const handleSelectMember = (member) => {
-        setSelectedMember(member);
-    };
-
-    const handleCloseCard = () => {
-        setSelectedMember(null);
-    };
+    if (!user) {
+        return <Login />;
+    }
 
     if (!splashCompleted || loading) {
         return <SplashScreen onComplete={handleSplashComplete} />;
@@ -70,21 +67,35 @@ function App() {
 
     return (
         <div className={`main-container relative ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-            <div className="flex flex-col md:flex-row h-screen relative z-10">
-                <div className="md:w-1/6 w-full">
-                    <Sidebar
-                        members={members}
-                        onSelectMember={handleSelectMember}
-                        orgInfo={orgInfo}
-                    />
+            <div className="flex h-screen relative z-10">
+                {/* Левый сайдбар */}
+                <div className="md:w-1/6 w-0 hidden md:block">
+                    <Sidebar members={members} onSelectMember={handleSelectMember} orgInfo={orgInfo} />
                 </div>
-                {selectedMember && (
-                    <div className="flex-grow flex items-center justify-center md:w-5/6 w-full">
+
+                {/* Основной контент */}
+                <div className="flex-grow flex items-center justify-center overflow-auto">
+                    {selectedMember ? (
                         <MemberCard member={selectedMember} onClose={handleCloseCard} />
-                    </div>
-                )}
+                    ) : (
+                        <p className="text-center text-gray-500">Выберите участника слева</p>
+                    )}
+                </div>
+
+                {/* Правый сайдбар — комментарии */}
+                <aside className="w-80 overflow-auto hidden md:flex flex-col">
+                    <Comments />
+                </aside>
             </div>
         </div>
+    );
+}
+
+function App() {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
     );
 }
 
