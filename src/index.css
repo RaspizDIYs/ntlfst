@@ -5,5 +5,5 @@ body {
 }
 
 html.dark body {
-    @apply bg-[#1a1a1a] text-gray-200;
+    @apply bg-gray-900 text-gray-200;
 }

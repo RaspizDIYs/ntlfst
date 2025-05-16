@@ -17,7 +17,7 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [splashCompleted, setSplashCompleted] = useState(false);
 
-    const {isDark} = useThemeStore();
+    const { isDark } = useThemeStore();
 
     useEffect(() => {
         const fetchOrgInfo = async () => {
@@ -70,14 +70,16 @@ function App() {
 
     return (
         <div className={`main-container relative ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-            <div className="flex h-screen relative z-10">
-                <Sidebar
-                    members={members}
-                    onSelectMember={handleSelectMember}
-                    orgInfo={orgInfo}
-                />
+            <div className="flex flex-col md:flex-row h-screen relative z-10">
+                <div className="md:w-1/6 w-full">
+                    <Sidebar
+                        members={members}
+                        onSelectMember={handleSelectMember}
+                        orgInfo={orgInfo}
+                    />
+                </div>
                 {selectedMember && (
-                    <div className="flex-grow flex items-center justify-center">
+                    <div className="flex-grow flex items-center justify-center md:w-5/6 w-full">
                         <MemberCard member={selectedMember} onClose={handleCloseCard} />
                     </div>
                 )}
