@@ -59,3 +59,5 @@ yarn.lock
 pnpm-lock.yaml
 .npm/
 .pnpm-store/
+# Local Netlify folder
+.netlify

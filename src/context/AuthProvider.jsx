@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import AuthContext from './AuthContext';
-import { supabase } from '../api/supabaseClient';
+import AuthContext from './AuthContext.js';
+import { supabase } from '@/api/supabaseClient.js';
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -11,14 +11,14 @@ const AuthProvider = ({ children }) => {
             setUser(session?.user ?? null);
         };
 
-       void getInitialSession();
+        void getInitialSession();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { subscription } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
         });
 
         return () => {
-            subscription.unsubscribe();
+            subscription?.unsubscribe();
         };
     }, []);
 
@@ -30,7 +30,7 @@ const AuthProvider = ({ children }) => {
     const signOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
-        setUser(null); // null — гость
+        setUser(null);
     };
 
     return (

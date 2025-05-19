@@ -1,4 +1,3 @@
-// MemberCard.jsx
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { FaSyncAlt, FaTimes } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

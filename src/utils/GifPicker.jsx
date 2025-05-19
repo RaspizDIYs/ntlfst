@@ -8,17 +8,17 @@ const GifPicker = ({ onSelectGif }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [search, setSearch] = useState('');
+    const [offset, setOffset] = useState(0);
+    const [totalCount, setTotalCount] = useState(null);
 
-    // Дебаунс для поиска
     const fetchGifs = useCallback(
-        async (searchTerm = '') => {
+        async (searchTerm = '', offsetValue = 0) => {
             setLoading(true);
             setError(null);
 
             try {
-                const url = searchTerm
-                    ? `/.netlify/functions/gifProxy?q=${encodeURIComponent(searchTerm)}&limit=${LIMIT}`
-                    : `/.netlify/functions/gifProxy?limit=${LIMIT}`;
+                const query = searchTerm || 'funny';
+                const url = `/.netlify/functions/gifProxy?q=${encodeURIComponent(query)}&limit=${LIMIT}&offset=${offsetValue}`;
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`HTTP ошибка: ${response.status}`);
@@ -29,10 +29,8 @@ const GifPicker = ({ onSelectGif }) => {
                     throw new Error('Неверный формат ответа API');
                 }
 
-                // Tenor v2 возвращает media_formats внутри results[].media_formats
                 const gifsData = data.results
                     .map((gif) => {
-                        // Приоритет выбора gif.url по media_formats (gif, mediumgif)
                         const url =
                             gif.media_formats?.gif?.url ||
                             gif.media_formats?.mediumgif?.url ||
@@ -47,6 +45,7 @@ const GifPicker = ({ onSelectGif }) => {
                     .filter((gif) => gif.url);
 
                 setGifs(gifsData);
+                setTotalCount(data.results.length < LIMIT ? offsetValue + gifsData.length : null);
             } catch (err) {
                 console.error('Ошибка загрузки гифок:', err);
                 setError(err.message);
@@ -58,47 +57,62 @@ const GifPicker = ({ onSelectGif }) => {
         []
     );
 
-    // useEffect для начальной загрузки трендов
     useEffect(() => {
-        fetchGifs();
-    }, [fetchGifs]);
+        fetchGifs(search.trim(), offset);
+    }, [fetchGifs, search, offset]);
 
-    // Дебаунс хук
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            fetchGifs(search.trim());
-        }, DEBOUNCE_DELAY);
-
-        return () => clearTimeout(handler);
-    }, [search, fetchGifs]);
+    const handleSearch = (e) => {
+        setSearch(e.target.value);
+        setOffset(0); // сброс при новом запросе
+    };
 
     return (
-        <div>
+        <div className="p-2 border rounded bg-white dark:bg-gray-800">
             <input
                 type="text"
                 placeholder="Поиск гифок..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{ marginBottom: 10, padding: 6, width: '100%' }}
+                onChange={handleSearch}
+                className="w-full p-2 mb-3 border rounded"
                 aria-label="Поиск гифок"
                 autoComplete="off"
             />
 
-            {loading && <p>Загрузка гифок...</p>}
-            {error && <p style={{ color: 'red' }}>Ошибка: {error}</p>}
+            {loading && <p className="text-sm text-gray-500">Загрузка гифок...</p>}
+            {error && <p className="text-red-500 text-sm">Ошибка: {error}</p>}
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-64 overflow-y-auto">
                 {gifs.map(({ id, url, title }) => (
                     <img
                         key={id}
                         src={url}
                         alt={title || 'GIF'}
-                        style={{ width: 100, height: 100, objectFit: 'cover', cursor: 'pointer' }}
-                        onClick={() => onSelectGif && onSelectGif(url)}
+                        className="w-full h-24 object-cover cursor-pointer hover:opacity-80"
+                        onClick={() => onSelectGif?.(url)}
                         title="Выбрать гифку"
                         loading="lazy"
                     />
                 ))}
+            </div>
+
+            <div className="flex justify-between items-center mt-3 text-sm">
+                <button
+                    onClick={() => setOffset((prev) => Math.max(0, prev - LIMIT))}
+                    disabled={offset === 0}
+                    className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50"
+                >
+                    ← Назад
+                </button>
+                <span className="text-gray-500">
+          Страница {Math.floor(offset / LIMIT) + 1}
+        </span>
+                <button
+                    onClick={() => setOffset((prev) => prev + LIMIT)}
+                    disabled={totalCount !== null && offset + LIMIT >= totalCount}
+                    className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50"
+                >
+                    Вперёд →
+                </button>
             </div>
         </div>
     );

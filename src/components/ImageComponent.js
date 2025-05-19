@@ -1,4 +1,3 @@
-// src/components/ImageComponent.js
 
 const ExternalImageComponent = () => {
     return (

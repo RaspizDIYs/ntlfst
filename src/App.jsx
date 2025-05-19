@@ -1,4 +1,3 @@
-// app.jsx
 import React, { useContext, useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import MemberCard from "./components/MemberCard";
@@ -14,6 +13,8 @@ import Comments from './components/Comments';
 const octokit = new Octokit({
     auth: import.meta.env.VITE_GITHUB_TOKEN,
 });
+
+console.log('GitHub Token:', import.meta.env.VITE_GITHUB_TOKEN);
 
 function AppContent() {
     const { user } = useContext(AuthContext);
