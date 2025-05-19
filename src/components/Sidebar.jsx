@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { SunIcon, MoonIcon, UsersIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { FaUserCircle } from "react-icons/fa";
 import useThemeStore from "../store/useThemeStore";
-
+import { FaGithub, FaGoogle, FaDiscord } from "react-icons/fa";
 import AuthContext from "../context/AuthContext";
 
 const Sidebar = ({ members, onSelectMember, orgInfo }) => {
@@ -106,30 +106,28 @@ const Sidebar = ({ members, onSelectMember, orgInfo }) => {
                             >
                                 {isGuest ? (
                                     <>
-                                        <button
-                                            onClick={() => handleLogin("github")}
-                                            className="w-full py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
-                                        >
-                                            Log In with GitHub
+                                        <button onClick={() => handleLogin("github")} className="icon-btn">
+                                            <FaGithub className="w-5 h-5" />
                                         </button>
-                                        <button
-                                            onClick={() => handleLogin("google")}
-                                            className="w-full py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
-                                        >
-                                            Log In with Google
+                                        <button onClick={() => handleLogin("google")} className="icon-btn">
+                                            <FaGoogle className="w-5 h-5" />
                                         </button>
-                                        <button
-                                            onClick={() => handleLogin("discord")}
-                                            className="w-full py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
-                                        >
-                                            Log In with Discord
+                                        <button onClick={() => handleLogin("discord")} className="icon-btn">
+                                            <FaDiscord className="w-5 h-5" />
                                         </button>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="mb-2">
-                                            Signed in as <b>{user.email || user.user_metadata?.full_name || user.id}</b>
-                                        </div>
+                                    <div className="mb-2 flex items-center space-x-2">
+                                        <img
+                                            src={user.user_metadata?.avatar_url}
+                                            alt="avatar"
+                                            className="w-6 h-6 rounded-full"
+                                        />
+                                        <span className="font-semibold truncate max-w-[100px]">
+                                                {user.user_metadata?.full_name || user.email || user.id}
+                                            </span>
+                                    </div>
                                         <button
                                             onClick={handleLogout}
                                             className="w-full py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
