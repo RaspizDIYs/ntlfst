@@ -8,7 +8,7 @@ import { Octokit } from "@octokit/rest";
 import AuthProvider from './context/AuthProvider';
 import AuthContext from './context/AuthContext';
 import Login from './components/Login';
-import Comments from './components/Comments';
+import Comments from './components/comments/index';
 
 
 const octokit = new Octokit({
